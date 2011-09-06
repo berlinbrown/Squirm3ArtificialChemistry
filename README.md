@@ -7,3 +7,5 @@ Squirm3 is an artificial chemistry simulation - a world where we can make up our
 http://www.sq3.org.uk/Evolution/Squirm3/ - Tim Hutton
 
 Mirror of squirm demo
+
+In the screenshot above, each block represents an atom.  When two atoms collide then a reaction might occur.  If the reaction is a one of the available strong reactions then a bond will form.  Lines are drawn between atoms with bonds.  A cluster of atoms with strong bonds represent a molecule.
