@@ -21,9 +21,13 @@
  */
 package org.squirm.chem;
 
+import org.apache.log4j.Logger;
+
 // SquirmReaction.java
 
 class SquirmReaction {
+
+    private static final Logger LOGGER = Logger.getLogger(SquirmReaction.class);
     
     public char us_type;
     public int us_state;
@@ -43,6 +47,6 @@ class SquirmReaction {
         this.them_state = them_state;
         this.future_us_state = future_us_state;
         this.future_bond = future_bond;
-        this.future_them_state = future_them_state;
+        this.future_them_state = future_them_state;        
     }
 };

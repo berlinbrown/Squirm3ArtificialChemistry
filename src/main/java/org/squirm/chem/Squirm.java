@@ -22,10 +22,6 @@
  */
 package org.squirm.chem;
 
-//******************************************************************************
-// Squirm.java:	Applet
-//******************************************************************************
-
 import java.awt.Color;
 import java.awt.Event;
 import java.awt.Graphics;
@@ -33,13 +29,17 @@ import java.awt.Image;
 
 import javax.swing.JFrame;
 
+import org.apache.log4j.Logger;
+
 /**
- * Main Class for JFrame Squirm
+ * Main Class for JFrame Squirm Java Graphics Component. 
  */
 public class Squirm extends JFrame implements Runnable {
-
+      
     private static final long serialVersionUID = 1L;
 
+    private static final Logger LOGGER = Logger.getLogger(Squirm.class);
+    
     /**
      * THREAD SUPPORT: m_Squirm is the Thread object for the applet
      */
@@ -58,13 +58,9 @@ public class Squirm extends JFrame implements Runnable {
     protected Image offscreenImage = null;
     protected Graphics off_g = null;
 
-    private static final int SLOW = 1000;
     private static final int FAST = 1;
-
-    private int delay = 120;
-
+    private int delay = 240;
     private boolean paused = false;
-
     private int draw_every = 1;
 
     // When an internal error has occurred this string is set to report the
@@ -74,10 +70,11 @@ public class Squirm extends JFrame implements Runnable {
 
     // When the mouse is moved around the pointed-at cell can be inspected by
     // the user (esp when paused)
-    private String inspect_msg;
-    private int inspect_msg_x, inspect_msg_y;
+    private String inspect_msg = "x";
+    private int inspect_msg_x = 20, inspect_msg_y = 20;
 
     private String current_cell;
+    private long counter = 0;
 
     /**
      * Squirm Class Constructor
@@ -92,7 +89,7 @@ public class Squirm extends JFrame implements Runnable {
         }
         error_msg = new String();
     }
-    
+
     public void togglePaused() {
         paused = !paused;
     }
@@ -109,10 +106,6 @@ public class Squirm extends JFrame implements Runnable {
         squirmGrid.setFloodPeriod(period);
     }
 
-    public void setCosmicStateProb(double p) {
-        chemistry.setCosmicStateProb(p);
-    }
-
     public void setDrawOnlyEvery(int every) {
         draw_every = every;
     }
@@ -124,14 +117,17 @@ public class Squirm extends JFrame implements Runnable {
 
     public void addReaction(String us_type, int us_state, boolean current_bond, String them_type, int them_state,
             int future_us_state, boolean future_bond, int future_them_state) {
-        
-        SquirmReaction r = new SquirmReaction(us_type.toCharArray()[0], us_state, current_bond,                
+
+        final SquirmReaction r = new SquirmReaction(us_type.toCharArray()[0], us_state, current_bond,
                 them_type.toCharArray()[0], them_state, future_us_state, future_bond, future_them_state);
         chemistry.addReaction(r);
 
         // DEBUG: show each received reaction
-        error_msg += us_type + us_state + (current_bond ? "-" : " ") + them_type + them_state + " => " + us_type
-                + future_us_state + (future_bond ? "-" : " ") + them_type + future_them_state + "; ";
+        final String msg = us_type + us_state + (current_bond ? "-" : " ") + them_type + them_state + " => " + us_type
+        + future_us_state + (future_bond ? "-" : " ") + them_type + future_them_state + "; ";
+        error_msg += msg;
+        final String addReaction = msg;
+        LOGGER.info("Adding reaction allowed on the grid (init) : " + addReaction);        
     }
 
     /**
@@ -156,7 +152,6 @@ public class Squirm extends JFrame implements Runnable {
         // CreateControls() method from within this method. Remove the following
         // call to resize() before adding the call to CreateControls();
         // CreateControls() does its own resizing.
-        // ----------------------------------------------------------------------
         resize(drawing_size_x, drawing_size_y);
 
         if (offscreenImage == null) {
@@ -173,33 +168,34 @@ public class Squirm extends JFrame implements Runnable {
         removeAllReactions();
 
         // which reaction-set do you want?
-        switch (0) {
+        final int typeOfReactionAllowedEditableFromSrc = 0;
+        switch (typeOfReactionAllowedEditableFromSrc) {
         case 0: {
             // new slimline replication reactions (for: e8-a1-b1-...-f1)
             addReaction("e", 8, false, "e", 0, 4, true, 3); // R1
-            addReaction("x", 4, true, "y", 1, 2, true, 5); // R2
+            addReaction("x", 4, true,  "y", 1, 2, true, 5); // R2
             addReaction("x", 5, false, "x", 0, 7, true, 6); // R3
             addReaction("x", 3, false, "y", 6, 2, true, 3); // R4
-            addReaction("x", 7, true, "y", 3, 4, true, 3); // R5
-            addReaction("f", 4, true, "f", 3, 8, false, 8); // R6
-            addReaction("x", 2, true, "y", 8, 9, true, 1); // R7
-            addReaction("x", 9, true, "y", 9, 8, false, 8); // R8
+            addReaction("x", 7, true,  "y", 3, 4, true, 3); // R5
+            addReaction("f", 4, true,  "f", 3, 8, false, 8); // R6
+            addReaction("x", 2, true,  "y", 8, 9, true, 1); // R7
+            addReaction("x", 9, true,  "y", 9, 8, false, 8); // R8
             break;
         }
         case 1: {
             // genes as instructions (for: e1-a1-b1-...-f1)
             addReaction("e", 1, false, "e", 0, 4, true, 3); // R1
-            addReaction("x", 4, true, "y", 1, 2, true, 5); // R2
+            addReaction("x", 4, true,  "y", 1, 2, true, 5); // R2
             addReaction("x", 5, false, "x", 0, 7, true, 6); // R3
             addReaction("x", 3, false, "y", 6, 2, true, 3); // R4
-            addReaction("x", 7, true, "y", 3, 4, true, 3); // R5
-            addReaction("f", 4, true, "f", 3, 8, false, 8); // R6
-            addReaction("x", 2, true, "y", 8, 9, true, 10); // R7
-            addReaction("x", 9, true, "y", 9, 8, false, 8); // R8
+            addReaction("x", 7, true,  "y", 3, 4, true, 3); // R5
+            addReaction("f", 4, true,  "f", 3, 8, false, 8); // R6
+            addReaction("x", 2, true,  "y", 8, 9, true, 10); // R7
+            addReaction("x", 9, true,  "y", 9, 8, false, 8); // R8
 
             addReaction("f", 10, true, "x", 10, 1, true, 11); // R9
             addReaction("x", 12, true, "y", 10, 1, true, 11); // R10
-            addReaction("e", 8, true, "x", 12, 1, true, 1); // R11
+            addReaction("e", 8, true,  "x", 12, 1, true, 1); // R11
 
             // some catalysing reactions to try
             addReaction("a", 11, false, "b", 0, 12, false, 1); // R12?
@@ -301,7 +297,7 @@ public class Squirm extends JFrame implements Runnable {
     public void destroy() {
     }
 
-    /** 
+    /**
      * Squirm Paint Handler
      */
     public void paint(final Graphics g) {
@@ -317,6 +313,10 @@ public class Squirm extends JFrame implements Runnable {
 
         // Show the result.
         g.drawImage(offscreenImage, 0, 0, this);
+        counter++;
+        if ((counter % 100) == 0) {
+            LOGGER.info("Counter update : value=" + counter);
+        }
     }
 
     /**
@@ -329,7 +329,7 @@ public class Squirm extends JFrame implements Runnable {
             g.drawString(error_msg, 10, 100);
         }
         g.drawString(inspect_msg, inspect_msg_x, inspect_msg_y);
-        g.drawString(current_cell, 10, 120);
+        g.drawString(current_cell, 20, 120);
     }
 
     /**
@@ -337,7 +337,6 @@ public class Squirm extends JFrame implements Runnable {
      * appears on the screen. The AppletWizard's initial implementation of this
      * method starts execution of the applet's thread.
      */
-    // --------------------------------------------------------------------------
     public void start() {
         if (m_Squirm == null) {
             m_Squirm = new Thread(this);
@@ -350,10 +349,8 @@ public class Squirm extends JFrame implements Runnable {
      * longer on the screen. The AppletWizard's initial implementation of this
      * method stops execution of the applet's thread.
      */
-    // --------------------------------------------------------------------------
     public void stop() {
         if (m_Squirm != null) {
-            m_Squirm.stop();
             m_Squirm = null;
         }
     }
@@ -365,10 +362,9 @@ public class Squirm extends JFrame implements Runnable {
      * here. For example, for an applet that performs animation, the run()
      * method controls the display of images.
      */
-    // --------------------------------------------------------------------------
     public void run() {
         while (true) {
-            try {                
+            try {
                 // ask the squirm world to execute one time step
                 try {
                     if (!paused) {

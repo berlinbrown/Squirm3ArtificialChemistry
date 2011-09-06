@@ -45,7 +45,7 @@ public class SquirmGrid {
     protected int n_x, n_y;
 
     /** list of the SquirmCells that exist in the grid */
-    protected Vector cell_list;
+    protected Vector<SquirmCell> cell_list;
 
     /** a count of the time steps elapsed */
     private int count = 0;
@@ -102,17 +102,16 @@ public class SquirmGrid {
             for (j = 0; j < n_y; j++)
                 cell_grid[i][j] = new SquirmCellSlot();
 
-        cell_list = new Vector();
-
+        cell_list = new Vector<SquirmCell>();
         initSimple();
     }
 
     // ----------------------------------------------------------
 
     /** straightforward drawing of the grid and its contents */
-    public void draw(Graphics g, float scale, boolean fast) {
+    public void draw(final Graphics g, float scale, boolean fast) {
         // ask all the cells to draw themselves
-        for (Enumeration e = cell_list.elements(); e.hasMoreElements();)
+        for (final Enumeration<SquirmCell> e = cell_list.elements(); e.hasMoreElements();)
             ((SquirmCell) e.nextElement()).draw(g, scale, cell_grid, fast);
 
         // draw the time step counter on top
@@ -156,7 +155,7 @@ public class SquirmGrid {
     /** give each cell a chance to move, in strict order */
     public void doTimeStep(SquirmChemistry chemistry) {
         SquirmCell cell;
-        for (Enumeration e = cell_list.elements(); e.hasMoreElements();) {
+        for (final Enumeration<SquirmCell> e = cell_list.elements(); e.hasMoreElements();) {
             cell = (SquirmCell) e.nextElement();
             // ask the cell to make any reactions possible
             cell.makeReactions(chemistry, n_x, n_y, cell_grid);
@@ -173,7 +172,7 @@ public class SquirmGrid {
     }
 
     /** delete all cells in the right-hand half of the area and refresh */
-    private void doCataclysm() {
+    protected void doCataclysm() {
         // kill all cells on one side
         int x, y;
         for (x = (on_right ? n_x / 2 : 0); x < (on_right ? n_x : n_x / 2); x++) {

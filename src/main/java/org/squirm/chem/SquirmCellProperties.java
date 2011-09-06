@@ -37,18 +37,18 @@ class SquirmCellProperties {
 
     protected static final int MAX_AGE = 1000;
 
-    private static final Color TYPE_COLOURS[] = { Color.red.brighter(), Color.green, Color.orange, Color.gray,
+    private Color TYPE_COLOURS[] = { Color.red.brighter(), Color.green, Color.orange, Color.gray,
             Color.cyan, Color.blue.brighter() };
 
-    public static final int getRandomType() {
+    public static int getRandomType() {
         return (int) Math.floor(Math.random() * MAX_TYPES);
     }
 
-    public static final int getRandomCodonType() {
+    public int getRandomCodonType() {
         return (int) Math.floor(Math.random() * (MAX_TYPES - 2)) + 2;
     }
 
-    public static final int getRandomState() {
+    public int getRandomState() {
         return (int) Math.floor(Math.random() * MAX_STATES);
     }
 
@@ -144,6 +144,10 @@ class SquirmCellProperties {
         default:
             throw new Error("SquirmCellProperties::getType : unknown type!");
         }
+    }
+    
+    public String toString() {
+        return "[Super.SquirmCell : " + getStringType() + state + " / type=" + getStringType() + " state=" + state + "]"; 
     }
     
 } // End of the class //

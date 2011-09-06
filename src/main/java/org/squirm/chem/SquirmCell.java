@@ -30,13 +30,18 @@ import java.awt.Graphics;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
+
 public class SquirmCell extends SquirmCellProperties {
 
+    private static final Logger LOGGER = Logger.getLogger(SquirmCell.class);
+    
     // / the cell's current location
     private int x, y;
 
     // / bonds is a list of all the cells currently bonded with
-    private Vector bonds;
+    private Vector<SquirmCell> bonds;
 
     // / which direction did we move in previously?
     private int last_x, last_y; // for momentum-style physics
@@ -47,28 +52,21 @@ public class SquirmCell extends SquirmCellProperties {
     private static final int EIGHT_x[] = { -1, -1, 0, 1, 1, 1, 0, -1, 0 };
     private static final int EIGHT_y[] = { 0, -1, -1, -1, 0, 1, 1, 1, 0 };
 
-    /*
-     * encoding of a 4-neighbourhood: 1 0 x 2 3
-     */
-    private static final int FOUR_x[] = { -1, 0, 1, 0 };
-    private static final int FOUR_y[] = { 0, -1, 0, 1 };
-
     private static final boolean momentum_style_physics = false;
 
     /**
      * Default constructor
      */
-    public SquirmCell(int x_loc, int y_loc, int cell_type, int cell_state, Vector cell_list,
+    public SquirmCell(int x_loc, int y_loc, int cell_type, int cell_state, Vector<SquirmCell> cell_list,
             SquirmCellSlot cell_grid[][]) {
         // initialize the superclass (SquirmCellProperties)
         super(cell_type, cell_state);
-
         if (cell_grid[x_loc][y_loc].queryEmpty()) {
             x = x_loc;
             y = y_loc;
             cell_list.addElement(this);
             cell_grid[x][y].makeOccupied(this);
-            bonds = new Vector();
+            bonds = new Vector<SquirmCell>();
 
             if (momentum_style_physics) {
                 // pick a movement direction at random
@@ -80,18 +78,26 @@ public class SquirmCell extends SquirmCellProperties {
             throw new Error("SquirmCell::SquirmCell : couldn't create, square is occupied!");
         }
     }
+    
+    public String toString() {
+        return super.toString();
+    }
 
-    /** access function returning x-coordinate */
+    /**
+     * access function returning x-coordinate
+     */
     public int getX() {
         return x;
     }
 
-    /** access function returning y-coordinate */
+    /**
+     * access function returning y-coordinate
+     */
     public int getY() {
         return y;
     }
 
-    public final Vector getBonds() {
+    public final Vector<SquirmCell> getBonds() {
         return bonds;
     }
 
@@ -111,8 +117,8 @@ public class SquirmCell extends SquirmCellProperties {
         int hx, hy;
         hx = (int) ((x + 0.5) * scale);
         hy = (int) ((y + 0.5) * scale);
-        for (Enumeration e = bonds.elements(); e.hasMoreElements();) {
-            SquirmCell cell = (SquirmCell) e.nextElement();
+        for (final Enumeration<SquirmCell> e = bonds.elements(); e.hasMoreElements();) {
+            final SquirmCell cell = (SquirmCell) e.nextElement();
             float tx, ty;
             tx = cell.getX();
             ty = cell.getY();
@@ -126,17 +132,20 @@ public class SquirmCell extends SquirmCellProperties {
 
         // draw our state (if enough room)
         if (scale >= 12) {
-            Integer i = new Integer(getState());
-            g.drawString(i.toString(), (int) ((x * scale) + 2), (int) ((y * scale) + scale - 2));
+            final Integer i = new Integer(getState());
+            final String type = this.getStringType();
+            final String str = type + i.toString();
+            //g.drawString(i.toString(), (int) ((x * scale) + 2), (int) ((y * scale) + scale - 2));
+            g.drawString(str, (int) ((x * scale) + 2), (int) ((y * scale) + scale - 2));
         }
     }
 
     /**
      * find any reactions we can make
      */
-    public void makeReactions(SquirmChemistry chemistry, int n_x, int n_y, SquirmCellSlot cell_grid[][]) {
+    public void makeReactions(final SquirmChemistry chemistry, int n_x, int n_y, SquirmCellSlot cell_grid[][]) {
         // collect the unbonded neighbours of this cell (up to 8)
-        Vector neighbours = new Vector();
+        final Vector<SquirmCell> neighbours = new Vector<SquirmCell>();
         int tx, ty;
         SquirmCellSlot slot;
         SquirmCell cell;
@@ -148,9 +157,10 @@ public class SquirmCell extends SquirmCellProperties {
                 // does this cell slot contain a cell?
                 if (!slot.queryEmpty()) {
                     cell = slot.getOccupant();
-                    // is this cell unbonded with us?
-                    if (!bonds.contains(cell))
+                    // is this cell unbonded with us?                    
+                    if (!bonds.contains(cell)) {                        
                         neighbours.addElement(cell);
+                    }
                 }
             }
         }
@@ -163,7 +173,7 @@ public class SquirmCell extends SquirmCellProperties {
      * remove this cell from the grid and updates any references to itself in
      * other cells
      */
-    public void killSelf(Vector cell_list, SquirmCellSlot cell_grid[][]) {
+    public void killSelf(Vector<SquirmCell> cell_list, SquirmCellSlot cell_grid[][]) {
         // remove self from the grid
         cell_grid[x][y].makeEmpty();
         // remove self from the list
@@ -258,7 +268,7 @@ public class SquirmCell extends SquirmCellProperties {
         // then this move would break a bond and is not valid
 
         SquirmCell cell;
-        for (Enumeration e = bonds.elements(); e.hasMoreElements();) {
+        for (Enumeration<SquirmCell> e = bonds.elements(); e.hasMoreElements();) {
             cell = (SquirmCell) e.nextElement();
             if (Math.abs(tx - cell.getX()) > 1 || Math.abs(ty - cell.getY()) > 1)
                 // if(Math.abs(tx-cell.getX())+Math.abs(ty-cell.getY())>1)
@@ -270,9 +280,11 @@ public class SquirmCell extends SquirmCellProperties {
     /**
      * Link this cell to the other
      */
-    public void makeBondWith(SquirmCell other) {
+    public void makeBondWith(final SquirmCell other) {
         bonds.addElement(other);
         other.bonds.addElement(this);
+        LOGGER.info("Making bond : us=" + this + " -> withThem=" + other  + " numberBondsUs=" + bonds.size());        
+        
     }
 
     /**

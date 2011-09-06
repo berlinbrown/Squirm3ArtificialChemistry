@@ -25,6 +25,8 @@ import java.awt.Dimension;
 
 import javax.swing.JFrame;
 
+import org.apache.log4j.Logger;
+
 /**
  * Main entry point.
  * @author bbrown
@@ -32,12 +34,15 @@ import javax.swing.JFrame;
  */
 public class Main {
 
+    private static final Logger LOGGER = Logger.getLogger(Main.class);
+    
     /**
      * Main entry point.
      */
-    public static void main(final String [] args) {
-        System.out.println(">>> Running");
-        final Squirm frame = new Squirm();                
+    public static void main(final String [] args) {        
+        LOGGER.info(">>> Running");
+        final Squirm frame = new Squirm();
+        frame.setTitle("Squirm Artificial Chemistry");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocation(20, 20);    
         frame.setPreferredSize(new Dimension(800, 600));
@@ -46,7 +51,7 @@ public class Main {
         frame.setVisible(true);  
         frame.init();
         frame.start();        
-        System.out.println(">>> Done");
+        LOGGER.info(">>> Done");       
     }
     
 } // End of the class //
