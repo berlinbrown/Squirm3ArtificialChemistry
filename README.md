@@ -10,4 +10,4 @@ Mirror of squirm demo
 
 In the screenshot above, each block represents an atom.  When two atoms collide then a reaction might occur.  If the reaction is a one of the available strong reactions then a bond will form.  Lines are drawn between atoms with bonds.  A cluster of atoms with strong bonds represent a molecule.
 
-DNA and RNA are types of macromolecules.  They aren't represented in the demo but consider DNA and RNA molecules have interesting behavior that we like to model in our experiments.
+DNA and RNA are types of macromolecules.  They aren't represented in the demo but consider that DNA and RNA molecules have interesting behavior.
